@@ -1,7 +1,11 @@
+import React from "react";
 import Header from "./Components/header";
 import Userdetails from "./Components/User-details";
 import Users from "./Components/Users";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
 
 function App() {
   const router = createBrowserRouter([

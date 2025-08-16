@@ -3,7 +3,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 const Likebutton = () => {
   return (
     <>
-      <button class="like-button">
+      <button className="like-button">
         <i className="bi bi-suit-heart"></i>
       </button>
     </>

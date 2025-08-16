@@ -1,50 +1,84 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
-import Header from "../Components/header";
+import Header from "./header";
 import "./userdetails.css";
 import { userAction } from "../Store/user-slice";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import { useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { RootState } from "../Store";
 
-const Userdetails = () => {
-  const { userId } = useParams();
+interface Comment {
+  id: string;
+  userId: number;
+  comment: string;
+}
+
+interface Userdetails {
+  id: number;
+  firstName: string;
+  maidenName: string;
+  lastName: string;
+  email: string;
+  gender: string;
+  age: number;
+  phone: string;
+  birthDate: string;
+  bloodGroup: string;
+  weight: number;
+  height: number;
+  image: string;
+  userName: string;
+  university: string;
+  company: {
+    name: string;
+    department: string;
+    title: string;
+    address: {
+      address: string;
+      city: string;
+      state: string;
+      country: string;
+    };
+  };
+}
+
+const Userdetails: React.FC = () => {
+  const { userId } = useParams<{ userId: string }>();
   const dispatch = useDispatch();
-  const userData = useSelector((state) => state.user.userData);
-  const [userDetail, setUserDetail] = useState(null);
-
-  const likedUsers = useSelector((state) => state.user.likedUsers);
-  const userComments = useSelector((state) =>
-    state.user.comment.filter((comment) => comment.userId === +userId)
+  const userData = useSelector((state: RootState) => state.user.userData);
+  const likedUsers = useSelector((state: RootState) => state.user.likedUsers);
+  const userComments = useSelector((state: RootState) =>
+    state.user.comment.filter(
+      (comment) => comment.userId === Number(userId)
+    )
   );
+
   console.log(userComments)
+  const [userDetail, setUserDetail] = useState<Userdetails | null>(null);
   const [comment, setComment] = useState("");
 
-  const likeBtnHandler = (id) => {
+  const likeBtnHandler = (id: number) => {
     dispatch(userAction.toggleLike(id));
   };
 
-  const handleCommentChange = (e) => {
+  const handleCommentChange = (e: ChangeEvent<HTMLInputElement>) => {
     setComment(e.target.value);
-    console.log(comment)
-    dispatch(userAction.addCommnet(comment))
   };
 
-  const submitHandler = (event) => {
+  const submitHandler = (event: FormEvent) => {
     event.preventDefault();
     if (comment.trim()) {
       dispatch(
         userAction.addCommnet({
-          userId: +userId,
+          userId: Number(userId),
           comment: comment,
-          id:new Date().toISOString() 
         })
       );
       setComment("");
     }
   };
 
-  const handleDeleteComment = (commentId) => {
-    console.log(commentId);
+  const handleDeleteComment = (commentId: string) => {
     dispatch(userAction.deleteComment(commentId));
   };
 
@@ -62,10 +96,12 @@ const Userdetails = () => {
 
   useEffect(() => {
     if (!userDetail) {
-      const fetchedUserDetails = userData.find((user) => user.id === +userId);
+      const fetchedUserDetails = userData.find(
+        (user) => user.id === Number(userId)
+      );
       if (fetchedUserDetails) {
         localStorage.setItem("user-copy", JSON.stringify(fetchedUserDetails));
-        setUserDetail(fetchedUserDetails);
+        // setUserDetail(fetchedUserDetails);
       }
     }
   }, [userId, userData, userDetail]);
@@ -76,7 +112,7 @@ const Userdetails = () => {
 
   return (
     <>
-      <Header></Header>
+      <Header />
       <div className="user-details-container" key={userId}>
         <div className="box1">
           <div className="user-image">
@@ -90,11 +126,10 @@ const Userdetails = () => {
               {userDetail.firstName} {userDetail.maidenName}{" "}
               {userDetail.lastName}{" "}
               <i
-                className={`bi bi-heart-fill likebtn ${
-                  likedUsers[userDetail.id]
+                className={`bi bi-heart-fill likebtn ${likedUsers[userDetail.id]
                     ? "bi bi-heart-fill liked bump"
                     : "bi bi-heart"
-                }`}
+                  }`}
                 onClick={() => likeBtnHandler(userDetail.id)}
               ></i>
             </h2>
@@ -102,7 +137,7 @@ const Userdetails = () => {
               <h3>Basic Details</h3>
               <p>Email: {userDetail.email}</p>
               <div className="comment-section">
-                <form action="">
+                <form onSubmit={submitHandler}>
                   <input
                     type="text"
                     value={comment}
@@ -110,11 +145,7 @@ const Userdetails = () => {
                     id="comment"
                     placeholder="Add a comment..."
                   />
-                  <button
-                    type="submit"
-                    id="addCommentButton"
-                    onClick={submitHandler}
-                  >
+                  <button type="submit" id="addCommentButton">
                     Add Comment
                   </button>
                 </form>
@@ -148,13 +179,13 @@ const Userdetails = () => {
               <b>Weight:</b> {userDetail.weight} Kg
             </p>
             <p>
-              <b>Height: </b> {userDetail.height} cm
+              <b>Height:</b> {userDetail.height} cm
             </p>
           </div>
           <div className="subBox">
             <h3>Academic Details</h3>
             <p>
-              <b>University: </b> {userDetail.university}
+              <b>University:</b> {userDetail.university}
             </p>
           </div>
           <div className="subBox">
@@ -169,17 +200,17 @@ const Userdetails = () => {
               <b>Designation:</b> {userDetail.company.title}
             </p>
             <p>
-              <b>Address:</b> {userDetail.company.address.address},
-              {userDetail.company.address.city},
-              {userDetail.company.address.state},
+              <b>Address:</b> {userDetail.company.address.address},{" "}
+              {userDetail.company.address.city},{" "}
+              {userDetail.company.address.state},{" "}
               {userDetail.company.address.country}
             </p>
             <div>
               <b>
-                <u>Comment :</u>
+                <u>Comment:</u>
               </b>
               {userComments.length > 0 ? (
-                userComments.map((comment, index) => (
+                userComments.map((comment) => (
                   <div key={comment.id} className="comment">
                     <div>{comment.comments}</div>
                     <div>
@@ -191,7 +222,6 @@ const Userdetails = () => {
                           border: "none",
                           cursor: "pointer",
                         }}
-                        value={comment.id}
                       >
                         <i className="bi bi-trash"></i>
                       </button>

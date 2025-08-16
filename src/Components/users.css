@@ -82,12 +82,33 @@
 }
 
 .liked {
-    /* background-color: #E4405F; */
     color: #E4405F;
-    /* color: wheat; */
 }
 
-
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f000; /* Optional: Background color */
+  }
+  
+  
+  .loader {
+    border: 4px solid #afafaf; 
+    border-top: 4px solid purple;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  
 .bump {
     animation: bump 300ms ease-out;
 }

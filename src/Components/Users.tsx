@@ -1,19 +1,34 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { userAction } from "../Store/user-slice";
 import Header from "./header";
 import "./users.css";
 import { Link } from "react-router-dom";
-// import Likebutton from "../UI/LikeButton";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import { RootState } from "../Store";
 
-const Users = () => {
+interface User {
+  id: number;
+  firstName: string;
+  age: number;
+  image: string;
+}
+
+interface Comment {
+  id: string;
+  userId: number;
+  comment: string;
+}
+
+const Users: React.FC = () => {
   const dispatch = useDispatch();
-  const users = useSelector((state) => state.user.userData);
-  const likedUsers = useSelector((state) => state.user.likedUsers);
-  const likeBtnHandler = (id) => {
+  const users = useSelector((state: RootState) => state.user.userData);
+  const likedUsers = useSelector((state: RootState) => state.user.likedUsers);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const likeBtnHandler = (id: number) => {
     dispatch(userAction.toggleLike(id));
-    console.log(id + "liked");
+    console.log(id + " liked");
   };
 
   useEffect(() => {
@@ -21,21 +36,36 @@ const Users = () => {
       const response = await fetch("https://dummyjson.com/users");
       const data = await response.json();
       dispatch(userAction.setUsers(data.users));
+      setLoading(false); // Hide the loader after data fetch
     };
-    fetchData();
+
+    setTimeout(() => {
+      fetchData();
+    }, 50);
   }, [dispatch]);
 
-  const handleUserClick = (user) => {
+  const handleUserClick = (user: User) => {
     localStorage.setItem("user-copy", JSON.stringify(user));
   };
 
-  const userComments = useSelector((state) => state.user.comment);
+  const userComments = useSelector((state: RootState) => state.user.comment);
   console.log(userComments);
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <div className="loader-container">
+          <div className="loader"></div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
-      <Header> </Header>
-
-      {users.map((user, index) => {
+      <Header />
+      {users.map((user: User, index: number) => {
         const userCommentsForUser = userComments.filter(
           (comment) => comment.userId === user.id
         );
@@ -61,15 +91,13 @@ const Users = () => {
                 </div>
               </div>
             </Link>
-
             <div className="card-right">
               <div className="card-btn">
                 <i
-                  className={`bi bi-heart-fill likebtn ${
-                    likedUsers[user.id]
+                  className={`bi bi-heart-fill likebtn ${likedUsers[user.id]
                       ? "bi bi-heart-fill liked bump"
                       : "bi bi-heart"
-                  }`}
+                    }`}
                   onClick={() => likeBtnHandler(user.id)}
                 ></i>
               </div>
@@ -80,4 +108,5 @@ const Users = () => {
     </>
   );
 };
+
 export default Users;
